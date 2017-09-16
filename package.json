@@ -1,0 +1,25 @@
+{
+  "name": "simple-http-server",
+  "version": "1.0.0",
+  "engines": {
+    "node": "7.1.0",
+    "npm": "3.10.x"
+  },
+  "description": "A simple HTTP Server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "pretest": "eslint ./src --fix",
+    "test": "echo \"Tests complete\""
+  },
+  "author": "Christopher Bennett",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "eslint": "^4.6.1",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-plugin-import": "^2.7.0"
+  },
+  "dependencies": {
+    "save": "^2.3.1"
+  }
+}
