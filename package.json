@@ -1,11 +1,11 @@
 {
-  "name": "simple-http-server",
+  "name": "simple-API",
   "version": "1.0.0",
   "engines": {
-    "node": "7.1.0",
+    "node": "8.5.0",
     "npm": "3.10.x"
   },
-  "description": "A simple HTTP Server",
+  "description": "A simple API",
   "main": "index.js",
   "scripts": {
     "start": "node ./src/server.js",
