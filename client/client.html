@@ -11,9 +11,9 @@
       //grab the content section
       const content = document.querySelector("#content");
       
-      ///parse the response text into a JSON object
-      const obj = JSON.parse(xhr.response);
-      
+	  //access the content type
+      const type = xhr.getResponseHeader('content-type');
+	  
       //check the xhr status code and handle accordingly
       switch(xhr.status) {
         case 200: //success
@@ -22,17 +22,48 @@
         case 400: //bad request 
           content.innerHTML = `<b>Bad Request</b>`;
           break;
+		case 401: //unauthorized 
+          content.innerHTML = `<b>Unauthorized</b>`;
+          break;
+		case 403: //forbidden
+          content.innerHTML = `<b>Forbidden</b>`;
+          break;
         case 404: //not found (requested resource does not exist)
           content.innerHTML = `<b>Resource Not Found</b>`;
           break;
-        default: //default other errors we are not handling in this example
+		case 500: //internal error
+          content.innerHTML = `<b>Internal Error</b>`;
+          break;
+		case 501: //not implemented
+          content.innerHTML = `<b>Not Implemented</b>`;
+          break;
+        default: //default other errors we are not handling in this assignment
           content.innerHTML = `Error code not implemented by client.`;
           break;
       }
+	  
+	  
+	  if(type === 'application/json') {
+		//parse the response text into a JSON object
+        const obj = JSON.parse(xhr.response);
+		//add the json fields to our html elements
+        content.innerHTML += `<p> Message: ${obj.message}</p>`;
+		console.dir(obj);
+      } //if response was in xml
+      else if (type === 'text/xml') {
+		//grab the name tag and age tag from our responseXML
+		//This will only work if the responding XML is completely valid.
+		//Otherwise the responseXML field will be null
+		const message = xhr.responseXML.querySelector('message').textContent;
+        content.innerHTML += `<p> Message: ${message}</p>`;
+        console.dir(xhr.responseXML.querySelector('response').outerHTML);
+		
+	  }
+	  
     };
     
     //function to send ajax
-    const sendAjax = (url) => {
+    const sendAjax = (url, acceptedType) => {
       //create a new xhr (ajax) request. 
       //Remember that these are ASYNCHRONOUS
       const xhr = new XMLHttpRequest();
@@ -40,43 +71,43 @@
       xhr.open('GET', url);
       //Set the accept headers to the desired response mime type
       //Server does NOT have to support this. It is a gentle request.
-      xhr.setRequestHeader ("Accept", 'application/json');
+      xhr.setRequestHeader ("Accept", acceptedType);
 
       //When the xhr loads, call handleResponse and pass the xhr object
       xhr.onload = () => handleResponse(xhr);
-
+      
       //send our ajax request to the server
       xhr.send();
     };
 
     //initialization function
     const init = () => {
-	  const pages = document.querySelector("#page");
-      const send = document.querySelector("#send");
-      //const badRequestButton = document.querySelector("#badRequest");
-      //const notFoundButton = document.querySelector("#notFound");
-      
-      //functions to call sendAjax for us with the correct parameters
-      const success = () => sendAjax('/success');
-      const badRequest = () => sendAjax('/badRequest');
-      const notFound = () => sendAjax('/notFoundURL');
+	  //variables for the selection field options
+	  let option1 = '/success';
+	  let option2 = 'application/json';
 	  
+	  //Set the page elements to constants
+	  const pages = document.querySelector("#page");
+	  const contentType = document.querySelector("#type");
+      const send = document.querySelector("#send");
+      
+      //function to call sendAjax for us with the correct parameters
+      const success = () => sendAjax(option1,option2);
+	  
+	  //when this selection is changed update the option1
 	  pages.onchange = function(e) {
-		switch(e.target.value) {
-          case '/success': //success
-            send.addEventListener('click', success);
-            break;
-          case '/badRequest': //bad request 
-            send.addEventListener('click', badRequest);
-            break;
-          case '/notFound': //not found (requested resource does not exist)
-            send.addEventListener('click', notFound);
-            break;
-          default: //default other errors we are not handling in this example
-            content.innerHTML = `Error code not implemented by client.`;
-            break;
-        }
+		option1 = e.target.value;
 	  }
+	  
+	  //when this selection is changed update the option2
+	  contentType.onchange = function(e) {
+		option2 = e.target.value;
+	  }
+	  
+	  //link up the send button
+	  send.addEventListener('click', success);
+	  
+	  
 	    
     };
 

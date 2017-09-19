@@ -4,8 +4,9 @@ const url = require('url'); // pull in the url module
 const query = require('querystring');
 // pull in our html response handler file
 const htmlHandler = require('./htmlResponses.js');
-// pull in our json response handler file
-const jsonHandler = require('./jsonResponses.js');
+// pull in our response handler file
+const contentHandler = require('./responses.js');
+
 
 // set the port. process.env.PORT and NODE_PORT are for servers like heroku
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
@@ -13,9 +14,14 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 // key:value object to look up URL routes to specific functions
 const urlStruct = {
   '/': htmlHandler.getIndex,
-  '/success': jsonHandler.success,
-  '/badRequest': jsonHandler.badRequest,
-  notFound: jsonHandler.notFound,
+  '/style.css': htmlHandler.getStyle,
+  '/success': contentHandler.success,
+  '/badRequest': contentHandler.badRequest,
+  '/unauthorized': contentHandler.unauthorized,
+  '/forbidden': contentHandler.forbidden,
+  '/internal': contentHandler.internal,
+  '/notImplemented': contentHandler.notImplemented,
+  notFound: contentHandler.notFound,
 };
 
 // handle HTTP requests. In node the HTTP server will automatically
@@ -29,12 +35,15 @@ const onRequest = (request, response) => {
   // and parse them into a reusable object by field name
   const params = query.parse(parsedUrl.query);
 
+  // grab the 'accept' headers (comma delimited) and split them into an array
+  const acceptedTypes = request.headers.accept.split(',');
+
   // check if the path name (the /name part of the url) matches 
   // any in our url object. If so call that function. If not, default to index.
   if (urlStruct[parsedUrl.pathname]) {
-    urlStruct[parsedUrl.pathname](request, response, params);
+    urlStruct[parsedUrl.pathname](request, response, params, acceptedTypes);
   } else {
-    urlStruct.notFound(request, response, params);
+    urlStruct.notFound(request, response, params, acceptedTypes);
   }
 };
 
